@@ -30,16 +30,12 @@ class build:
         self.data = np.copy(rec['data'])
         self.data = np.mean(self.data[:,0,:],axis=0)
         ms.close()
-    
-        self.u = np.append(self.u,-self.u)
-        self.v = np.append(self.v,-self.v)
-        self.data = np.append(self.data,np.conj(self.data))
 
         if cdelt is None:
             uvdist = np.hypot(self.u,self.v)
 
             cdelt = 3.60E+03*np.rad2deg(0.25/np.nanmax(uvdist))
-            cdelt = int(np.round(cdelt,2)/0.25)*0.25
+            cdelt = int(np.round(cdelt,2)/5.00E-05)*5.00E-05
 
             cdelt = cdelt*u.arcsec
         
@@ -71,4 +67,7 @@ class build:
     
     def image(self,c=None):
         if c is None: c = self.data
-        return jax_finufft.nufft1((self.csize,self.csize),c/np.size(c),self.x,self.y).real
+        x = jp.append(self.x,-self.x)
+        y = jp.append(self.y,-self.y)
+        c = jp.append(c,c.conj())
+        return jax_finufft.nufft1((self.csize,self.csize),c/np.size(c),x,y).real
